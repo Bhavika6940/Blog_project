@@ -99,6 +99,27 @@ const createData = async (req, res, schema) => {
 
 const updateData = async (req, res, schema) => {
     try {
+
+        if (schema.modelName === "Category") {
+
+            const rules = {
+                name: "sometimes|sting|min:2|max:100",
+                description: "sometimes|string|max:500"
+            };
+
+            const validation = new Validator(req.body, rules);
+
+            if (validation.fails()) {
+                return res.status(422).json({
+                    success: false,
+                    errors: Objcet.keys(validation.errors.all()).map(field => ({
+                        field,
+                        message: validation.errors.first(field)
+                    }))
+                });
+            }
+
+        }
         const id = req.params.id;
         const data = req.body;
         const dbRes = await service.updateRecord(id, data, schema);

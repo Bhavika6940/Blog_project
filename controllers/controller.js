@@ -54,30 +54,7 @@ const getDataById = async (req, res, schema) => {
 
 const createData = async (req, res, schema) => {
     try {
-        // User validation
-        if (schema.modelName === "User") {
-            const rules = {
-                username: "required|string|min:3|max:30",
-                email: "required|email",
-                password: "required|string|min:6",
-                role: "in:Admin,Author,Reader",
-                Profile: "nullable|string"
 
-            };
-
-            const validation = new Validator(req.body, rules);
-
-            if (validation.fails()) {
-                return res.status(422).json({
-                    success: false,
-                    errors: Object.keys(validation.errors.all()).map(field => ({
-                        field,
-                        message: validation.errors.first(field)
-                    }))
-                });
-            }
-
-        }
         const data = req.body;
         const dbRes = await service.createNewRecord(data, schema);
         res.status(200).json({

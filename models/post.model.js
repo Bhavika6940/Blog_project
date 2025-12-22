@@ -1,7 +1,9 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const { DataTypes } = require('sequelize');
+const sequelize = require('./db');
+const user = require('./User');
+const Category = require('./Category');
 
-const postSchema = new Schema(
+const Post = sequelize.define(
     {
         title: {
             type: String,

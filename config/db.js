@@ -1,14 +1,20 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 
-const connectDB = async () => {
+const sequelize = new Sequelize('BlogDb', 'root', '', {
+    host: 'localhost',
+    dialect: 'mysql',
+    logging: false
+});
+
+const testConnection = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("MongoDB connected");
-
+        await sequelize.authenticate();
+        console.log('Sequilize connected to MySQL successfully!');
     }
     catch (error) {
-        console.error(error);
-        process.exit(1);
+        console.error('Unable to connect to MYSQL:', error);
     }
 };
-module.exports = connectDB;
+
+testConnection();
+module.exports = sequelize;
