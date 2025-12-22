@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const commentController = require("../controllers/comment.controller");
+const { createData,
+    updateData,
+    deleteData,
+    getAllData,
+    getDataById
+} = require("../controllers/comment.controller");
 const { Comment } = require("../models");
 
 router.post("/", (req, res) => {
