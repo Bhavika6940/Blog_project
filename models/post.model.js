@@ -3,50 +3,65 @@ const sequelize = require('./db');
 const user = require('./User');
 const Category = require('./Category');
 
-const Post = sequelize.define(
+const Post = sequelize.define('Post',
     {
         title: {
-            type: String,
-            required: true
+            type: DataTypes.STRING,
+            allowNull: false
         },
         slug: {
-            type: String,
+            type: DataTypes.STRING,
             unique: true
         },
 
         content: {
-            type: String,
-            required: true
+            type: DataTypes.TEXT,
+            allowNull: false
         },
 
-        excerpt: String,
-
-
-        metaTitle: { type: String },
-        metaDescription: { type: String },
-
-        author: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        },
-        category: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Category"
+        excerpt: {
+            type: DataTypes.TEXT,
+            allowNull: true
         },
 
-        tags: [String],
+
+        metaTitle: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        metaDescription: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+
+
+        tags: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
         status: {
-            type: String,
-            enum: ["Draft", "Published"],
-            default: "Draft"
+            enum: DataTypes.ENUM("Draft", "Published"),
+            defaultValue: "Draft"
         },
         views: {
-            type: Number,
-            default: 0
+            type: DataTypes.INTEGER,
+            defaultValue: 0
         },
-        image: String
+        image: {
+            type: DataTypes.STRING,
+            allowNull: true
+        }
     },
-    { timestamps: true }
+    {
+        tableName: 'posts',
+        timestamps: true
+    }
 );
 
-module.exports = mongoose.model("Post", postSchema);
+Post.belongsTo(User, { foreignKey: 'authorId', as: 'author' });
+Post.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+
+User.hasMany(Post, { foreignKey: 'authorId', as: 'posts' });
+Category.hasMany(Post, { foreignKey: 'categoryId', as: 'posts' })
+
+module.exports = Post;

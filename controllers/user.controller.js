@@ -2,9 +2,9 @@
 const service = require("../services/db.service");
 const { validationResult } = require("express-validator");
 
-const getAllData = async (req, res, schema) => {
+const getAllData = async (req, res, Model) => {
     try {
-        const dbRes = await service.findAllRecord(schema);
+        const dbRes = await service.findAllRecord(Model);
         res.status(200).json({
             message: "Data fetched successfully!",
             success: true,
@@ -23,10 +23,10 @@ const getAllData = async (req, res, schema) => {
 
 
 
-const getDataById = async (req, res, schema) => {
+const getDataById = async (req, res, Model) => {
     try {
         const query = { _id: req.params.id };
-        const dbRes = await service.findOneRecord(query, schema);
+        const dbRes = await service.findOneRecord(query, Model);
 
         if (!dbRes) {
             return res.status(404).json({
@@ -53,11 +53,11 @@ const getDataById = async (req, res, schema) => {
     }
 };
 
-const createData = async (req, res, schema) => {
+const createData = async (req, res, Model) => {
     try {
 
         // User validation
-        if (schema.modelName === "User") {
+        if (Model.name === "User") {
             const rules = {
                 username: "required|string|min:3|max:30",
                 email: "required|email",
@@ -84,7 +84,7 @@ const createData = async (req, res, schema) => {
 
 
         const data = req.body;
-        const dbRes = await service.createNewRecord(data, schema);
+        const dbRes = await service.createNewRecord(data, Model);
         res.status(200).json({
             success: true,
             message: "Record created successfully!",
@@ -92,7 +92,7 @@ const createData = async (req, res, schema) => {
         })
     }
     catch (err) {
-        if (err.code === 11000) {
+        if (err.name === "SequelizeUniqueConstraint" || err.original?.code === "ER_DUP_ENTRY") {
             return res.status(422).json({
                 message: "Already exists!",
                 error: err.message,
@@ -107,10 +107,10 @@ const createData = async (req, res, schema) => {
     }
 };
 
-const updateData = async (req, res, schema) => {
+const updateData = async (req, res, Model) => {
     try {
 
-        if (schema.modelName == "User") {
+        if (Model.name == "User") {
             const rules = {
                 username: "sometimes|string|min:3|max:30",
                 email: "sometimes|email",
@@ -133,7 +133,7 @@ const updateData = async (req, res, schema) => {
         }
         const id = req.params.id;
         const data = req.body;
-        const dbRes = await service.updateRecord(id, data, schema);
+        const dbRes = await service.updateRecord(id, data, Model);
         if (!dbRes) {
             return res.status(404).json({
                 success: false,
@@ -157,10 +157,10 @@ const updateData = async (req, res, schema) => {
     }
 };
 
-const deleteData = async (req, res, schema) => {
+const deleteData = async (req, res, Model) => {
     try {
         const id = req.params.id;
-        const dbRes = await service.deleteRecord(id, schema);
+        const dbRes = await service.deleteRecord(id, Model);
         if (!dbRes) {
             return res.status(404).json({
                 success: false,

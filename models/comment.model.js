@@ -1,23 +1,28 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const { DataTypes } = require('sequelize');
+const sequilize = require('./db');
+const Post = require('./post.model');
+const User = require('./user.model')
 
-const commentSchema = new Schema(
+const Comment = sequelize.define('Comment', {
+
+    content: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    }
+
+
+},
     {
-        post: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Post"
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        },
-        content: {
-            type: String,
-            required: true
-        }
-    },
-    { timestamps: true }
+        tableName: 'comments',
+        timestamps: true
+    }
 );
+//Associations
+Comment.belongsTo(Post, { foreignKey: 'postId', as: 'post' });
+Comment.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
-module.exports = mongoose.model("Comment", commentSchema);
+Post.hasMany(Comment, { foreignKey: 'postId', as: 'comments' });
+User.hasMany(Comment, { foreignKey: 'userId', as: 'comments' });
+module.exports = Comment;
+
 
