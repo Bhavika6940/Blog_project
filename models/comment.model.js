@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequilize = require('./db');
+const {sequelize} = require('../config/db');
 const Post = require('./post.model');
 const User = require('./user.model')
 
@@ -9,8 +9,6 @@ const Comment = sequelize.define('Comment', {
         type: DataTypes.TEXT,
         allowNull: false
     }
-
-
 },
     {
         tableName: 'comments',

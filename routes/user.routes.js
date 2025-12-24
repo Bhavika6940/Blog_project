@@ -7,8 +7,9 @@ const { createData,
     deleteData
 } = require("../controllers/user.controller");
 const { User } = require("../models");
+const upload = require("../services/upload.service")
 
-router.post("/", (req, res) => {
+router.post("/", upload.single("image"),(req, res) => {
     createData(req, res, User);
 });
 router.get("/", (req, res) => {

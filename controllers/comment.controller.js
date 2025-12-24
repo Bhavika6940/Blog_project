@@ -1,5 +1,6 @@
 const service = require("../services/db.service");
-const { validationResult } = require("express-validator");
+const Validator = require('validatorjs');
+
 
 const getAllData = async (req, res, Model) => {
     try {
@@ -24,8 +25,7 @@ const getAllData = async (req, res, Model) => {
 
 const getDataById = async (req, res, Model) => {
     try {
-        const query = { _id: req.params.id };
-        const dbRes = await service.findOneRecord(query, Model);
+        const dbRes = await service.findById(req.params.id, Model);
 
         if (!dbRes) {
             return res.status(404).json({
@@ -57,9 +57,9 @@ const createData = async (req, res, Model) => {
 
         if (Model.name === "Comment") {
             const rules = {
-                post: "required|string",
-                user: "required|string|minLength:1|maxLength:500",
-                content: "required|string|minLength:1|maxLength:500"
+                postId: "required|integer",
+                userId: "required|integer",
+                content: "required|string|min:1|max:500"
             };
 
             const validation = new Validator(req.body, rules);

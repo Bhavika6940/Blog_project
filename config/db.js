@@ -1,20 +1,43 @@
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('BlogDb', 'root', '', {
-    host: 'localhost',
-    dialect: 'mysql',
-    logging: false
-});
+const DB_NAME = 'BlogDb';
+const DB_USER = 'root';
+const DB_PASS = '';
+const DB_HOST  = 'localhost';
+const DIALECT = 'mysql';
 
-const testConnection = async () => {
-    try {
+const sequelizeWithoutDB = new Sequelize('', DB_USER, DB_PASS, {
+        host: DB_HOST,
+        dialect: DIALECT,
+        logging: false
+        });
+
+ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
+            host : DB_HOST,
+            dialect : DIALECT,
+            logging : false
+        });
+
+
+const createDatabaseAndConnect = async () => {
+    try{
+        // connect to database without specifying database
+        await sequelizeWithoutDB.authenticate();
+        console.log('Connected to MYSQL server successfully!');
+        
+        await sequelizeWithoutDB.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
+        console.log(`Database "${DB_NAME}" created or already exists`);
+
+        //connect to the newly created database
         await sequelize.authenticate();
-        console.log('Sequilize connected to MySQL successfully!');
-    }
-    catch (error) {
-        console.error('Unable to connect to MYSQL:', error);
-    }
-};
+        console.log(`Connected to database "${DB_NAME}" successfully!`);
 
-testConnection();
-module.exports = sequelize;
+    }
+    catch(err){
+        console.error('Error connecting to MySQL: ', err);
+    }
+}
+
+
+
+module.exports = {createDatabaseAndConnect, sequelize};

@@ -9,22 +9,22 @@ const { createData,
 const { Comment } = require("../models");
 
 router.post("/", (req, res) => {
-    commentController.createData(req, res, Comment);
+    createData(req, res, Comment);
 });
 
 router.put("/:id", (req, res) => {
-    commentController.updateData(req, res, Comment);
+    updateData(req, res, Comment);
 });
 
 router.delete("/:id", (req, res) => {
-    commentController.deleteData(req, res, Comment);
+    deleteData(req, res, Comment);
 });
 
 router.get("/", (req, res) => {
-    commentController.getAllData(req, res, Comment);
+   getAllData(req, res, Comment);
 });
 
 router.get("/:id", (req, res) => {
-    commentController.getDataById(req, res, Comment);
+    getDataById(req, res, Comment);
 });
 module.exports = router;

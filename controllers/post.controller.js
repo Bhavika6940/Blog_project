@@ -1,5 +1,7 @@
 const service = require("../services/db.service");
-const { validationResult } = require("express-validator");
+const Validator = require('validatorjs');
+
+
 
 const getAllData = async (req, res, Model) => {
     try {
@@ -24,8 +26,8 @@ const getAllData = async (req, res, Model) => {
 
 const getDataById = async (req, res, Model) => {
     try {
-        const query = { _id: req.params.id };
-        const dbRes = await service.findOneRecord(query, Model);
+        
+        const dbRes = await service.findById(req.params.id, Model);
 
         if (!dbRes) {
             return res.status(404).json({
@@ -54,25 +56,32 @@ const getDataById = async (req, res, Model) => {
 
 const createData = async (req, res, Model) => {
     try {
+        const data = JSON.parse(JSON.stringify(req.body));
+
+         if (data.tags && typeof data.tags === "string") {
+            data.tags = data.tags.split(",").map(tag => tag.trim());
+        }
+
+        if(req.file && Model.name === "Post"){
+            data.image = `/img/${req.file.filename}`;
+        }
 
         if (Model.name === "Post") {
             const rules = {
                 title: "required|string|min:3|max:150",
-                slug: "nullable|string|min:3|max:200|regex:/^\\S+$",
+                slug: "sometimes|string|min:3|max:200|regex:/^\\S+$",
                 content: "required|string|min:10",
-                excerpt: "nullable|string|max:300",
-                metaTitle: "nullable|string|max:60",
-                metaDescription: "nullable|string|max:160",
-                author: "required|string",
-                category: "required|string",
+                excerpt: "sometimes|string|max:300",
+                metaTitle: "sometimes|string|max:60",
+                metaDescription: "sometimes|string|max:160",
+                authorId: "required|integer",
+                categoryId: "required|integer",
                 tags: "array",
                 "tags.*": "string",
                 status: "in:Draft,Published",
-                views: "numeric|min:0",
-                image: "nullable|string"
+                views: "numeric|min:0"
             };
-
-            const validation = new Validator(req.body, rules);
+            const validation = new Validator(data, rules);
 
             if (validation.fails()) {
                 return res.status(422).json({
@@ -85,17 +94,16 @@ const createData = async (req, res, Model) => {
             }
         }
 
-        const data = req.body;
         const dbRes = await service.createNewRecord(data, Model);
-        res.status(200).json({
+        res.status(201).json({
             success: true,
             message: "Record created successfully!",
             data: dbRes
         })
     }
     catch (err) {
-        if (err.name === "Seque") {
-            return res.status(422).json({
+        if (err.name === "SequelizeUniqueConstraintError"  ||  err.original?.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
                 message: "Already exists!",
                 error: err.message,
                 success: false
@@ -111,21 +119,18 @@ const createData = async (req, res, Model) => {
 
 const updateData = async (req, res, Model) => {
     try {
-        if (Model.name === "SequelizeUniqueConstraint" || err.original?.code === "ER_DUP_ENTRY") {
-            const rules = {
+        const rules = {
                 title: "sometimes|string|min:3|max:150",
                 slug: "sometimes|string|min:3|max:200",
                 context: "sometimes|string|min:10",
-                excerpt: "nullable|string|max:300",
-                metaTitle: "nullable|string|max:60",
-                metaDescription: "nullable|string|max:160",
-                author: "sometimes|string",
-                category: "sometimes|string",
+                excerpt: "sometimes|string|max:300",
+                metaTitle: "sometimes|string|max:60",
+                metaDescription: "sometimes|string|max:160",
                 tags: "array",
                 "tags.*": "string",
                 status: "sometimes|in:Draft,Published",
                 views: "numeric|min:0",
-                image: "nullable|string"
+                image: "sometimes|string"
             }
             const validation = new Validator(req.body, rules);
             if (validation.fails()) {
@@ -136,7 +141,6 @@ const updateData = async (req, res, Model) => {
                         message: validation.errors.first(field)
                     }))
                 });
-            }
         }
         const id = req.params.id;
         const data = req.body;
@@ -154,15 +158,27 @@ const updateData = async (req, res, Model) => {
             data: dbRes
 
         });
-    }
+        }
     catch (err) {
-        res.status(400).json({
+
+        if (err.name === "SequelizeUniqueConstraint" || err.original?.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
+                success: false,
+                message: "Duplicate entry detected!",
+                error: err.errors?.[0]?.message || err.message
+            });
+        }
+
+         res.status(400).json({
             success: false,
             message: "Internal server error!",
             error: err.message
         });
+
+        }
+       
     }
-};
+
 
 const deleteData = async (req, res, Model) => {
     try {

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('./db');
-const user = require('./User');
-const Category = require('./Category');
+const {sequelize} = require('../config/db');
+const User = require('./user.model');
+const Category = require('./category.model');
 
 const Post = sequelize.define('Post',
     {
@@ -40,7 +40,7 @@ const Post = sequelize.define('Post',
             allowNull: true
         },
         status: {
-            enum: DataTypes.ENUM("Draft", "Published"),
+            type: DataTypes.ENUM("Draft", "Published"),
             defaultValue: "Draft"
         },
         views: {

@@ -1,4 +1,4 @@
-const sequelize = require('./db');
+const {sequelize} = require('../config/db');
 const { DataTypes } = require('sequelize');
 
 const User = sequelize.define('User',
@@ -19,10 +19,6 @@ const User = sequelize.define('User',
         role: {
             type: DataTypes.ENUM("Admin", "Author", "Reader"),
             default: "Reader"
-        },
-        profile: {
-            type: DataTypes.STRING,
-            allowNull: true
         }
     },
     {

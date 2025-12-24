@@ -8,7 +8,16 @@ const cors = require('cors');
 
 dotenv.config();
 
-const connectDB = require("./config/db");
+const {sequelize,createDatabaseAndConnect} = require("./config/db");
+const startServer = async () => {
+  await createDatabaseAndConnect();
+
+  //Sync models here
+  await sequelize.sync();
+
+  const app = express();
+  app.listen(5000, () => console.log('Server running on port 5000'));
+}
 //Router files
 const postRoutes = require("./routes/post.routes");
 const userRoutes = require("./routes/user.routes");
@@ -19,7 +28,7 @@ const uploadRoutes = require("./routes/upload.routes");
 const app = express();
 
 //connect to database
-connectDB();
+startServer();
 
 // Middleware
 app.set('views', path.join(__dirname, 'views'));
@@ -38,11 +47,11 @@ app.use(express.urlencoded({ extended: true }));
 
 //Route level middleware
 
-app.use("/api/posts", postRoutes);
+app.use("/api/post", postRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/comment", commentRoutes);
 app.use("/api/category", categoryRoutes);
-app.use("/api/uploads", uploadRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
