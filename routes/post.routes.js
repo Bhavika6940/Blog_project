@@ -8,7 +8,10 @@ const { getAllData,
 
 } = require("../controllers/post.controller");
 const { Post } = require("../models");
-const upload = require("../services/upload.service")
+const upload = require("../services/upload.service");
+const verifyToken = require("../middlewares/verifyToken");
+const checkOwnership = require("../middlewares/ownsership");
+const {deletePost , updatePost , getMyPosts} = requi
 
 
 router.get("/", (req, res) => {
@@ -17,19 +20,23 @@ router.get("/", (req, res) => {
 router.get("/:id", (req, res) => {
     getDataById(req, res, Post);
 });
-router.post("/", upload.single("image"), (req, res) => {
+router.post("/", verifyToken ,upload.single("image"), (req, res) => {
     createData(req, res, Post);
 });
-router.put("/:id", (req, res) => {
+router.put("/:id", verifyToken, authorize("canEdit"), checkOwnership(Post),(req, res) => {
     updateData(req, res, Post);
 
 });
-router.delete("/:id", (req, res) => {
+router.delete("/:id", verifyToken, authorize("canDelete"), checkOwnership(Post), (req, res) => {
     deleteData(req, res, Post)
 });
 
-
-
-// router.put("/:id", upload.single("image"), updatePost);
+// router.get(
+//   "/my-posts",
+//   verifyToken,
+//   authorize("canRead"),
+//   getMyPosts
+// );
+    //  check
 
 module.exports = router;

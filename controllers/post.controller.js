@@ -1,6 +1,6 @@
 const service = require("../services/db.service");
 const Validator = require('validatorjs');
-
+const { canDeleteRecord } = require("../services/authorization.service");
 
 
 const getAllData = async (req, res, Model) => {
@@ -20,9 +20,6 @@ const getAllData = async (req, res, Model) => {
         });
     }
 };
-
-
-
 
 const getDataById = async (req, res, Model) => {
     try {
@@ -180,33 +177,73 @@ const updateData = async (req, res, Model) => {
     }
 
 
-const deleteData = async (req, res, Model) => {
-    try {
-        const id = req.params.id;
-        const dbRes = await service.deleteRecord(id, Model);
-        if (!dbRes) {
+const deleteData = async (req , res , Model) => {
+    try{
+        const {id} = req.params;
+        const user = req.user;  
+
+        const record = await Model.findByPk(id);
+
+        if(!record){
             return res.status(404).json({
                 success: false,
-                message: "Record not found!"
-            })
+                message : "Record not found"
+            });
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Record deleted successfully!",
-            data: dbRes
+        const isAllowed = await canDeleteRecord(user, record);
+
+        if(!isAllowed){
+            return res.status(403).json({
+                success: false,
+                message : "You are not allowed to delete this record"
+            });
+        }
+
+        await Model.destroy({ where : {id}});
+
+        return res.status(200).json({
+            success : true,
+            message : "Record deleted successfully",
         })
     }
-    catch (err) {
-        res.status(400).json({
+    catch(error){
+        return res.status(500).json({
             success: false,
-            message: err.message,
-            message: "Internal server error!"
+            message : "Internal server error",
+            error: error.message
         });
-
     }
+};
 
-}
+
+// const deleteData = async (req, res, Model) => {
+//     try {
+//         const id = req.params.id;
+//         const dbRes = await service.deleteRecord(id, Model);
+//         if (!dbRes) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Record not found!"
+//             })
+//         }
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Record deleted successfully!",
+//             data: dbRes
+//         })
+//     }
+//     catch (err) {
+//         res.status(400).json({
+//             success: false,
+//             message: err.message,
+//             message: "Internal server error!"
+//         });
+
+//     }
+
+// }
 
 module.exports = {
     getAllData,
