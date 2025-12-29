@@ -58,10 +58,10 @@ const Post = sequelize.define('Post',
     }
 );
 
-Post.belongsTo(User, { foreignKey: 'authorId', as: 'author' });
+Post.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Post.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
 
-User.hasMany(Post, { foreignKey: 'authorId', as: 'posts' });
+User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
 Category.hasMany(Post, { foreignKey: 'categoryId', as: 'posts' })
 
 module.exports = Post;

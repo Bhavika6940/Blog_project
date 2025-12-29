@@ -6,26 +6,26 @@ const { createData,
     getAllData,
     getDataById
 } = require("../controllers/comment.controller");
-const  Comment  = require("../models");
+const  Permission  = require("../models");
 const {verifyToken} = require("../middlewares/auth.middleware");
 
 router.post("/", verifyToken,(req, res) => {
-    createData(req, res, Comment);
+    createData(req, res,Permission);
 });
 
 router.put("/:id", verifyToken,(req, res) => {
-    updateData(req, res, Comment);
+    updateData(req, res, Permission);
 });
 
 router.delete("/:id", verifyToken,(req, res) => {
-    deleteData(req, res, Comment);
+    deleteData(req, res, Permission);
 });
 
 router.get("/", verifyToken,(req, res) => {
-   getAllData(req, res, Comment);
+   getAllData(req, res, Permission);
 });
 
 router.get("/:id", verifyToken, (req, res) => {
-    getDataById(req, res, Comment);
+    getDataById(req, res, Permission);
 });
 module.exports = router;

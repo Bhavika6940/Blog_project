@@ -1,8 +1,5 @@
-
 const service = require("../services/db.service");
 const Validator = require('validatorjs');
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 
 
 const getAllData = async (req, res, Model) => {
@@ -22,6 +19,9 @@ const getAllData = async (req, res, Model) => {
         });
     }
 };
+
+
+
 
 const getDataById = async (req, res, Model) => {
     try {
@@ -55,19 +55,12 @@ const getDataById = async (req, res, Model) => {
 const createData = async (req, res, Model) => {
     try {
 
-        // User validation
-        if (Model.name === "User") {
+        if (Model.name === "Comment") {
             const rules = {
-                username: "required|string|min:3|max:30",
-                email: "required|email",
-                password: "required|string|min:6",
-                role: "in:admin,author",
-                Profile: "sometimes|string"
-
+                name : "required|min:4"
             };
 
             const validation = new Validator(req.body, rules);
-
             if (validation.fails()) {
                 return res.status(422).json({
                     success: false,
@@ -77,12 +70,7 @@ const createData = async (req, res, Model) => {
                     }))
                 });
             }
-            const saltRounds = 10;
-            req.body.password = await bcrypt.hash(req.body.password, saltRounds);
-
         }
-
-
 
         const data = req.body;
         const dbRes = await service.createNewRecord(data, Model);
@@ -93,10 +81,10 @@ const createData = async (req, res, Model) => {
         })
     }
     catch (err) {
-        if (err.name === "SequelizeUniqueConstraint" || err.original?.code === "ER_DUP_ENTRY") {
+        if (err.name === "SequelizeUniqueConstraintError" || err.original?.code === "ER_DUP_ENTRY") {
             return res.status(422).json({
                 message: "Already exists!",
-                error: err.message,
+                error: err.errors?.[0]?.message || err.message,
                 success: false
             })
         }
@@ -111,14 +99,11 @@ const createData = async (req, res, Model) => {
 const updateData = async (req, res, Model) => {
     try {
 
-        if (Model.name == "User") {
+        if (Model.name === "Comment") {
             const rules = {
-                username: "sometimes|string|min:3|max:30",
-                email: "sometimes|email",
-                password: "sometimes|string|min:6",
-                role: "sometimes|in:Admin,Author,Reader",
-                Profile: "sometimes|string"
-            };
+                name: "sometimes|min:3"
+               
+            }
 
             const validation = new Validator(req.body, rules);
 
@@ -128,6 +113,7 @@ const updateData = async (req, res, Model) => {
                     errors: Object.keys(validation.errors.all()).map(field => ({
                         field,
                         message: validation.errors.first(field)
+
                     }))
                 });
             }

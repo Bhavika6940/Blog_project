@@ -6,23 +6,24 @@ const {createData,
     updateData,
     deleteData
 } = require("../controllers/category.controller");
-const { Category } = require("../models");
+const  Category  = require("../models");
+const {verifyToken}  = require("../middlewares/auth.middleware")
 
-router.post("/", (req, res) => {
+router.post("/", verifyToken, (req, res) => {
     createData(req, res, Category);
 });
-router.get("/:id", (req, res) => {
+router.get("/:id", verifyToken, (req, res) => {
     getDataById(req, res, Category);
 });
-router.get("/", (req, res) => {
+router.get("/", verifyToken,(req, res) => {
     getAllData(req, res, Category);
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", verifyToken,(req, res) => {
     updateData(req, res, Category);
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", verifyToken, (req, res) => {
     deleteData(req, res, Category);
 })
 

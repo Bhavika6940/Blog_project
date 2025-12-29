@@ -16,10 +16,15 @@ const User = sequelize.define('User',
             type: DataTypes.STRING,
             required: true
         },
-        role: {
-            type: DataTypes.ENUM("Admin", "Author"),
-            allowNull : false,
-            default: "Author"
+
+        roleId : {
+            type : DataTypes.INTEGER,
+            allowNull: false,
+            references : {
+                model : 'roles',
+                key : 'id'
+            }
+
         }
     },
     {
