@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
-const {User} = require("../models");
+const {User , Role, Permission} = require("../models");
 
 
 ///Verify JWT Token
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if(!authHeader?.startsWith("Bearer ")){
@@ -16,7 +16,13 @@ const verifyToken = (req, res, next) => {
 
     try{
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        req.user = decoded;
+        const user = await User.findByPk(decoded.id, {
+            include : {
+                model : Role
+            }
+
+        });
+        req.user = user;
         next();
     }
     catch(error) {
@@ -29,28 +35,34 @@ const verifyToken = (req, res, next) => {
 
 /// RBAC (Role Based Access Control) + Permissions
 
-const authorize = (action) => {
+const authorize = (permissionName) => {
     return async (req, res ,next) => {
         try{
-            const user = await User.findByPk(req.user.id);
+            const user = req.user;
+            
 
-            if(!User) return res.status(404).json({
-                message : "User not found."
-            });
-
-            //Admin bypass
-            if(user.role === "admin") return next();
-
-            //Permission check for authors
-            const permissions = user.permissions || {};
-            if(user.role === "author"  && permissions[action]){
-                req.currentUser = user;
-                return next();
+            if(!user || ! user.Role){
+                return res.status(403).json({
+                    message : "Access denied . Role not found."
+                })
             }
-
-            return res.status(403).json({
-                message : `Forbidden : Missing ${action} permission.` 
+            const roleWithPermissions = await Role.findByPk(user.Role.id,{
+                include : [Permission]
             });
+
+            const permissions = roleWithPermissions?.Permissions || [];
+
+            const hasPermission = permissions.some(
+                p => p.name === permissionName
+            )
+            if(!hasPermission){
+                return res.status(403).json({
+                message : `You are FORBIDDEN to do this type of operation.` 
+            });
+            
+        };
+        next(); 
+            
         }
         catch(error){
             next(error);  // Pass to global error handler
@@ -59,9 +71,45 @@ const authorize = (action) => {
 }
 
 
+const checkCreateOwnership =  () => {
+    return async (req, res, next) =>{
+        try{
+        const loggedInUser = req.user;  // set by verifyToken
+        const targetUserId = req.body.userId;
+
+        if(!targetUserId) {
+            return res.status(400).json({
+                message: "userId is required to create a post"
+            });
+        }
+
+        if(loggedInUser.roleId === 1){
+            return next();
+        }
+        if (loggedInUser.roleId === 2) {
+            return next();
+        }
+
+        if(loggedInUser.roleId === 3){
+            if(loggedInUser.id !== targetUserId){
+                return res.status(403).json({
+                    message : "Authors can only create posts for themselves."
+                })
+            }
+        }
+         next();
+    }
+    catch(error){
+        next(error);
+    }
+
+    }
+    
+}
+
 ///Ownership Check
 
-const checkOwnership = (Model , ownerField = "userId") => {
+const checkOwnership =  (Model , ownerField = "userId") => {
     return async (req,res,next) => {
         try {
             const record = await Model.findByPk(req.params.id);
@@ -70,8 +118,8 @@ const checkOwnership = (Model , ownerField = "userId") => {
                 message : "Resource not found."
             })
             
-            //Admin can see/edit everything
-            if(req.user.role === "admin") {
+            
+            if(req.user.roleId === 1 || req.user.roleId === 2) {
                 req.record = record;
                 return next();
             }
@@ -91,8 +139,25 @@ const checkOwnership = (Model , ownerField = "userId") => {
     }
 }
 
+const checkCreateCommentOwnership = () => {
+    return async (req, res, next) => {
+        try {
+            const loggedInUser = req.user;
+
+            // userId should NEVER come from client for comments
+            req.body.userId = loggedInUser.id;
+
+            // All logged-in users can comment
+            next();
+        } catch (error) {
+            next(error);
+        }
+    };
+};
+
 module.exports = {
     verifyToken,
     authorize,
-    checkOwnership
+    checkCreateOwnership,
+    checkOwnership,checkCreateCommentOwnership 
 };

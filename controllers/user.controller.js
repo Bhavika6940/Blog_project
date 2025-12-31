@@ -61,7 +61,6 @@ const createData = async (req, res, Model) => {
                 username: "required|string|min:3|max:30",
                 email: "required|email",
                 password: "required|string|min:6",
-                role: "in:admin,author",
                 Profile: "sometimes|string"
 
             };

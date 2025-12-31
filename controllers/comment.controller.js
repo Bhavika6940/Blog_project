@@ -58,7 +58,6 @@ const createData = async (req, res, Model) => {
         if (Model.name === "Comment") {
             const rules = {
                 postId: "required|integer",
-                userId: "required|integer",
                 content: "required|string|min:1|max:500"
             };
 

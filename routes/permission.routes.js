@@ -6,10 +6,10 @@ const { createData,
     getAllData,
     getDataById
 } = require("../controllers/comment.controller");
-const  Permission  = require("../models");
-const {verifyToken} = require("../middlewares/auth.middleware");
+const  {Permission } = require("../models");
+const {verifyToken, authorize} = require("../middlewares/auth.middleware");
 
-router.post("/", verifyToken,(req, res) => {
+router.post("/", verifyToken, authorize("CREATE_PERMISSION"),(req, res) => {
     createData(req, res,Permission);
 });
 
@@ -21,7 +21,7 @@ router.delete("/:id", verifyToken,(req, res) => {
     deleteData(req, res, Permission);
 });
 
-router.get("/", verifyToken,(req, res) => {
+router.get("/", verifyToken, authorize("SEE_PERMISSIONS"),(req, res) => {
    getAllData(req, res, Permission);
 });
 

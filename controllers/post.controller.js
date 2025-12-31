@@ -1,12 +1,15 @@
 const service = require("../services/db.service");
 const Validator = require('validatorjs');
-const { canDeleteRecord } = require("../services/authorization.service");
+
 
 
 
 const getAllData = async (req, res, Model) => {
     try {
+        console.log("User", Model);
+
         const dbRes = await service.findAllRecord(Model);
+        console.log("Data",dbRes);
         res.status(200).json({
             message: "Data fetched successfully!",
             success: true,
@@ -55,11 +58,6 @@ const getDataById = async (req, res, Model) => {
 const createData = async (req, res, Model) => {
     try {
 
-        res.status(201).json({
-            success: true,
-            message: "Record created successfully!",
-           
-        })
         const data = JSON.parse(JSON.stringify(req.body));
 
          if (data.tags && typeof data.tags === "string") {
@@ -78,7 +76,7 @@ const createData = async (req, res, Model) => {
                 excerpt: "sometimes|string|max:300",
                 metaTitle: "sometimes|string|max:60",
                 metaDescription: "sometimes|string|max:160",
-                authorId: "required|integer",
+                userId: "required|integer",
                 categoryId: "required|integer",
                 tags: "array",
                 "tags.*": "string",
@@ -187,8 +185,6 @@ const updateData = async (req, res, Model) => {
 const deleteData = async (req , res , Model) => {
     try{
         const {id} = req.params;
-        const user = req.user;  
-
         const record = await Model.findByPk(id);
 
         if(!record){
@@ -198,16 +194,9 @@ const deleteData = async (req , res , Model) => {
             });
         }
 
-        const isAllowed = await canDeleteRecord(user, record);
+        
 
-        if(!isAllowed){
-            return res.status(403).json({
-                success: false,
-                message : "You are not allowed to delete this record"
-            });
-        }
-
-        await Model.destroy({ where : {id}});
+        await service.deleteRecord(id, Model);
 
         return res.status(200).json({
             success : true,
