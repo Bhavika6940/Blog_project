@@ -1,6 +1,7 @@
 const {sequelize} = require('../config/db');
 const { DataTypes } = require('sequelize');
 
+
 const User = sequelize.define('User',
     {
         username: {
@@ -21,14 +22,14 @@ const User = sequelize.define('User',
             type : DataTypes.INTEGER,
             allowNull: false,
             references : {
-                model : 'roles',
+                model : 'role',
                 key : 'id'
             }
 
         }
     },
     {
-        tableName: 'users',
+        tableName: 'user',
         timestamps: true
     }
 );

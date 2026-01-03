@@ -5,7 +5,7 @@ const logger = require('morgan');
 const express = require('express');
 const dotenv = require("dotenv");
 const cors = require('cors');
-const { Role, seedRBAC } = require('./models');
+const { Role, seedRBAC ,Permission} = require('./models');
 
 dotenv.config();
 const app = express();
@@ -17,7 +17,9 @@ const startServer = async () => {
   //Sync models here
   await sequelize.sync();
   const roleCount = await Role.count();
-  if(roleCount === 0){
+  const permissionCount = await Permission.count();
+
+  if(roleCount === 0 || permissionCount === 0){
     console.log("Database empty. Seeding RBAC");
     await seedRBAC();
   }
@@ -31,9 +33,9 @@ const commentRoutes = require("./routes/comment.routes");
 const categoryRoutes = require("./routes/category.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const roleRoutes = require("./routes/role.routes");
+const rolePermissionRoutes = require("./routes/rolePermission.routes");
+const userPermissionRoutes = require("./routes/userPermission.routes");
 const permissionRoutes = require("./routes/permission.routes");
-const rolePermissionRoutes = require("./routes/rolePermission.routes")
-
 //connect to database
 startServer();
 
@@ -60,8 +62,10 @@ app.use("/api/comment", commentRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/role", roleRoutes);
-app.use("/api/permission", permissionRoutes);
 app.use("/api/rolePermission", rolePermissionRoutes);
+app.use("/api/userPermission",userPermissionRoutes);
+app.use("/api/permission", permissionRoutes);
+
 
 
 // catch 404 and forward to error handler

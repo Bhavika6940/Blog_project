@@ -4,67 +4,53 @@ const Category = require("./category.model");
 const Comment = require("./comment.model");
 const Role = require("./role.model");
 const Permission = require("./permission.model");
-const RolePermission = require("./rolePermission.model")
+const RolePermission = require("./rolePermission.model");
+const UserPermission = require("./userPermission.model");
 
 
-// USER <-> ROLE
+
+
+// USER -> ROLE
 
 User.belongsTo(Role, {foreignKey : "roleId"});
 Role.hasMany(User , {foreignKey : "roleId"});
 
-// ROLE <-> PERMISSION
+// ROLE -> RolePermission
+Role.hasMany(RolePermission, {foreignKey : "roleId"});
+RolePermission.belongsTo(Role, {foreignKey : "roleId"});
 
-Role.belongsToMany(Permission, {
-    through : "RolePermissions",
-    foreignKey : "roleId",
-    otherKey : "permissionId"
-});
+// USER -> USERPERMISSION
+User.hasOne(UserPermission, {foreignKey : "userId"}); //foreign key lives in other table
+UserPermission.belongsTo( User, {foreignKey : "userId"});// foreign key lives in this table that is in up
 
-Permission.belongsToMany(Role, {
-    through : "RolePermissions",
-    foreignKey : "permissionId",
-    otherKey : "roleId"
-});
+// Role <-> Permission (Many to Many)
+Permission.hasMany(RolePermission, { foreignKey: "permissionId" });
+RolePermission.belongsTo(Permission, { foreignKey: "permissionId" });
 
-const seedRBAC = async () => {
-    await Role.create({ name: "SUPER_ADMIN" });
-    await Role.create({ name: "ADMIN" });
-    await Role.create({ name: "AUTHOR" });
 
-    await Permission.bulkCreate([
-        { name: "CREATE_ROLE" },
-        { name: "CREATE_PERMISSION" },
-        { name: "UPDATE_BLOG" },
-        { name: "DELETE_BLOG" },
-        {name : "CREATE_BLOG"},
-        {name : "CREATE_CATEGORY"},
-        {name : "DELETE_CATEGORY"},
-        {name : "UPDATE CATEGORY"},
-        {name : "CREATE_USER"},
-        {name : "GET_USERS"},
-        {name : "DELETE_USERS"},
-        {name : "UPDATE_USERS"},
-        {name : "DELETE_ROLE"},
-        {name : "UPDATE_ROLE"},
-        {name : "GET_ROLES"},
-        {name : "GET_BLOG"},
-        {name : "UPDATE_ROLE"},
-        {name : "SEE_PERMISSIONS"},
-        {name : "SET_PERMISSION_FOR_ROLE"},
-        {name : "DELETE_PERMISSION_FOR_ROLE"},
-        {name : "GET_PERMISSION_BY_ROLE"},
-        {name : "GET_USER_BY_ID"},
-        {name : "GET_BLOG_BY_ID"}
-    ], { ignoreDuplicates: true });
+seedRBAC = async () => {
+   await Role.bulkCreate(
+    [
+      { name: "SUPER_ADMIN" },
+      { name: "ADMIN" },
+      { name: "AUTHOR" }
+    ],
+    { ignoreDuplicates: true }
+  );
 
-    const superAdmin = await Role.findOne({ where: { name: "SUPER_ADMIN" } });
-    const permissions = await Permission.findAll();
+  // Permissions
+  await Permission.bulkCreate(
+    [
+      { resource: "user", name: "USER_MANAGEMENT", description: "Manage users" },
+      { resource: "role", name: "ROLE_MANAGEMENT", description: "Manage roles" },
+      { resource: "category", name: "CATEGORY_MANAGEMENT", description: "Manage categories" },
+      { resource: "post", name: "POST_MANAGEMENT", description: "Manage posts" }
+    ],
+    { ignoreDuplicates: true }
+  );
 
-    if (superAdmin) {
-        await superAdmin.setPermissions(permissions);
-    }
-};
-
+  console.log("RBAC seeded successfully");
+}
 
 
 module.exports = {
@@ -75,5 +61,7 @@ module.exports = {
     Role,
     Permission,
     RolePermission,
+    UserPermission,
+    Permission,
     seedRBAC
 };

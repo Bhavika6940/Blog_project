@@ -11,25 +11,25 @@ const upload = require("../services/upload.service");
 const { verifyToken, authorize} = require('../middlewares/auth.middleware');
 const {login} = require("../controllers/auth.controller");
 
-
+//verifyToken, authorize("user", "canWrite"),
 router.post("/login", login);
 
-router.post("/",  (req, res) => {
+router.post("/",   (req, res) => {
     createData(req, res, User);
 });
-router.get("/", verifyToken, authorize("GET_USERS"),(req, res) => {
+router.get("/", verifyToken,  authorize("user", "canRead"),(req, res) => {
     getAllData(req, res, User);
 }); 
 
-router.get("/:id", verifyToken, authorize("GET_USER_BY_ID"),(req, res) => {
+router.get("/:id", verifyToken, authorize("user", "canRead"), (req, res) => {
     getDataById(req, res, User);
 });
 
-router.put("/:id", verifyToken,authorize("UPDATE_USERS"), (req, res) => {
+router.put("/:id", verifyToken,authorize("user", "canWrite"), (req, res) => {
     updateData(req, res, User);
 });
 
-router.delete("/:id", verifyToken, authorize("DELETE_USERS"), (req, res) => {
+router.delete("/:id", verifyToken, authorize("user", "canDelete"), (req, res) => {
     deleteData(req, res, User);
 });
 

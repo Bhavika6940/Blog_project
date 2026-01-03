@@ -10,21 +10,21 @@ const  {Category}  = require("../models");
 const {verifyToken, authorize}  = require("../middlewares/auth.middleware");
 
 
-router.post("/", verifyToken, authorize("CREATE_CATEGORY") ,(req, res) => {
+router.post("/", verifyToken, authorize("category", "canWrite") ,(req, res) => {
     createData(req, res, Category);
 });
-router.get("/:id", verifyToken, (req, res) => {
+router.get("/:id", verifyToken, authorize("category", "canRead") ,(req, res) => {
     getDataById(req, res, Category);
 });
-router.get("/", verifyToken,(req, res) => {
+router.get("/", verifyToken, authorize("category", "canRead") ,(req, res) => {
     getAllData(req, res, Category);
 });
 
-router.put("/:id", verifyToken, authorize("UPDATE_CATEGORY"),(req, res) => {
+router.put("/:id", verifyToken, authorize("category", "canWrite") ,(req, res) => {
     updateData(req, res, Category);
 });
 
-router.delete("/:id", verifyToken, authorize("DELETE_CATEGORY"), (req, res) => {
+router.delete("/:id", verifyToken, authorize("category", "canDelete") , (req, res) => {
     deleteData(req, res, Category);
 })
 

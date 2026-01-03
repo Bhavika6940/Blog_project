@@ -57,8 +57,6 @@ const createData = async (req, res, Model) => {
 
         if (Model.name === "Comment") {
             const rules = {
-                    roleId: "required|integer",
-                    resource: "required|min:4",
                     canRead: "boolean",
                     canWrite: "boolean",
                     canDelete: "boolean"
@@ -105,12 +103,9 @@ const updateData = async (req, res, Model) => {
 
         if (Model.name === "Comment") {
             const rules = {
-                    roleId: "required|integer",
-                    resource: "required|min:4",
                     canRead: "boolean",
                     canWrite: "boolean",
                     canDelete: "boolean"
-               
             }
 
             const validation = new Validator(req.body, rules);

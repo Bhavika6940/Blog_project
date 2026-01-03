@@ -115,7 +115,6 @@ const updateData = async (req, res, Model) => {
                 username: "sometimes|string|min:3|max:30",
                 email: "sometimes|email",
                 password: "sometimes|string|min:6",
-                role: "sometimes|in:Admin,Author,Reader",
                 Profile: "sometimes|string"
             };
 

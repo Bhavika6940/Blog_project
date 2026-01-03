@@ -53,7 +53,7 @@ const Post = sequelize.define('Post',
         }
     },
     {
-        tableName: 'posts',
+        tableName: 'post',
         timestamps: true
     }
 );
@@ -61,7 +61,7 @@ const Post = sequelize.define('Post',
 Post.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Post.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
 
-User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
-Category.hasMany(Post, { foreignKey: 'categoryId', as: 'posts' })
+User.hasMany(Post, { foreignKey: 'userId', as: 'post' });
+Category.hasMany(Post, { foreignKey: 'categoryId', as: 'post' })
 
 module.exports = Post;

@@ -1,22 +1,31 @@
 const express = require("express");
 const router = express.Router();
 const { createData,
+    updateData,
     deleteData,
-    getAllData
-} = require("../controllers/comment.controller");
-const  {RolePermission}  = require("../models");
+    getAllData,
+    getDataById
+} = require("../controllers/rolePermission.controller");
+const  {RolePermission } = require("../models");
 const {verifyToken, authorize} = require("../middlewares/auth.middleware");
 
-router.post("/", verifyToken, authorize("SET_PERMISSION_FOR_ROLE"),(req, res) => {
-    createData(req, res, RolePermission);
+router.post("/", verifyToken, authorize("rolepermission", "canWrite"),(req, res) => {
+    createData(req, res,RolePermission);
 });
 
-router.delete("/:id", verifyToken, authorize("DELETE_PERMISSION_FOR_ROLE"),(req, res) => {
+router.put("/:id", verifyToken, authorize("rolepermission", "canWrite"),(req, res) => {
+    updateData(req, res, RolePermission);
+});
+
+router.delete("/:id", verifyToken, authorize("rolepermission", "canDelete"),(req, res) => {
     deleteData(req, res, RolePermission);
 });
 
-router.get("/", verifyToken,(req, res) => {
+router.get("/", verifyToken, authorize("rolepermission", "canRead"),(req, res) => {
    getAllData(req, res, RolePermission);
 });
 
+router.get("/:id", verifyToken,  authorize("rolepermission", "canRead"),(req, res) => {
+    getDataById(req, res, RolePermission);
+});
 module.exports = router;

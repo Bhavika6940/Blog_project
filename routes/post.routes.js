@@ -9,23 +9,23 @@ const { getAllData,
 } = require("../controllers/post.controller");
 const  {Post}  = require("../models");
 const upload = require("../services/upload.service");
-const { verifyToken, authorize , checkOwnership , checkCreateOwnership } = require('../middlewares/auth.middleware');
+const { verifyToken, authorize  } = require('../middlewares/auth.middleware');
 
 
-router.get("/", verifyToken,authorize("GET_BLOG"),   (req, res) => {
+router.get("/", verifyToken,authorize("post", "canRead"),   (req, res) => {
     getAllData(req, res, Post);
 });
-router.get("/:id", verifyToken,authorize("GET_BLOG_BY_ID"), checkOwnership(Post),(req, res) => {
+router.get("/:id", verifyToken,authorize("post" , "canRead"),(req, res) => {
     getDataById(req, res, Post);
 });
-router.post("/",  verifyToken ,authorize("CREATE_BLOG"), upload.single("image") ,checkCreateOwnership, (req, res) => {
+router.post("/",  verifyToken ,authorize("post", "canWrite"), upload.single("image") , (req, res) => {
     createData(req, res, Post);
 });
-router.put("/:id", verifyToken , authorize("UPDATE_BLOG"), checkOwnership(Post),(req, res) => {
+router.put("/:id", verifyToken , authorize("post", "canWrite"),(req, res) => {
     updateData(req, res, Post);
 
 });
-router.delete("/:id", verifyToken, authorize("DELETE_BLOG"), checkOwnership(Post), (req, res) => {
+router.delete("/:id", verifyToken,authorize("post", "canDelete"), (req, res) => {
     deleteData(req, res, Post)
 });
 

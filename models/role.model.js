@@ -1,6 +1,7 @@
 const {DataTypes} = require("sequelize");
 const { sequelize } = require("../config/db");
 
+
 const Role = sequelize.define("Role", {
     name : {
         type : DataTypes.STRING,
@@ -8,8 +9,10 @@ const Role = sequelize.define("Role", {
         unique : true
     }
 }, {
-    tableName : "roles",
+    tableName : "role",
     timestamps : false
 });
+
+
 
 module.exports = Role;

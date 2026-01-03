@@ -15,7 +15,7 @@ const getAllData = async (req, res, Model) => {
         res.status(500).json({
             message: "Internal server error!",
             success: false,
-            message: err.message
+            error: err.message
         });
     }
 };
@@ -25,13 +25,14 @@ const getAllData = async (req, res, Model) => {
 
 const getDataById = async (req, res, Model) => {
     try {
+        
         const dbRes = await service.findById(req.params.id, Model);
 
         if (!dbRes) {
             return res.status(404).json({
                 success: false,
                 message: "Record not found!"
-            })
+            });
         }
         res.status(200).json(
             {
@@ -54,13 +55,15 @@ const getDataById = async (req, res, Model) => {
 
 const createData = async (req, res, Model) => {
     try {
-
-        if (Model.name === "Comment") {
+        if (Model.name === "Category") {
             const rules = {
-                name : "required|min:4"
+                resource: "required|string|min:2|max:100",
+                name : "required|min :3",
+                description: "string|max:500"
             };
 
             const validation = new Validator(req.body, rules);
+
             if (validation.fails()) {
                 return res.status(422).json({
                     success: false,
@@ -81,7 +84,7 @@ const createData = async (req, res, Model) => {
         })
     }
     catch (err) {
-        if (err.name === "SequelizeUniqueConstraintError" || err.original?.code === "ER_DUP_ENTRY") {
+        if (err.name == "SequelizeUniqueConstraintError" || err.original?.code === "ER_DUP_ENTRY") {
             return res.status(422).json({
                 message: "Already exists!",
                 error: err.errors?.[0]?.message || err.message,
@@ -99,24 +102,26 @@ const createData = async (req, res, Model) => {
 const updateData = async (req, res, Model) => {
     try {
 
-        if (Model.name === "Comment") {
+        if (Model.name === "Category") {
+
             const rules = {
-                name: "sometimes|min:3"
-               
-            }
+                resource: "sometimes|string|min:2|max:100",
+                name: "sometimes|string|min:6",
+                description: "sometimes|string|max:500"
+            };
 
             const validation = new Validator(req.body, rules);
 
             if (validation.fails()) {
                 return res.status(422).json({
                     success: false,
-                    errors: Object.keys(validation.errors.all()).map(field => ({
+                    errors: Objcet.keys(validation.errors.all()).map(field => ({
                         field,
                         message: validation.errors.first(field)
-
                     }))
                 });
             }
+
         }
         const id = req.params.id;
         const data = req.body;
@@ -136,7 +141,7 @@ const updateData = async (req, res, Model) => {
         });
     }
     catch (err) {
-        res.status(400).json({
+        res.status(500).json({
             success: false,
             message: "Internal server error!",
             error: err.message

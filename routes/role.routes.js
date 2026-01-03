@@ -9,24 +9,24 @@ const { createData,
 const  {Role}  = require("../models");
 const {verifyToken, authorize} = require("../middlewares/auth.middleware");
 
-router.post("/", verifyToken,authorize("CREATE_ROLE"),(req, res) => {
+router.post("/", verifyToken,authorize("role", "canWrite"),(req, res) => {
     createData(req, res,Role);
 });
 
-router.put("/:id", verifyToken, authorize("UPDATE_ROLE"), (req,res) => {
+router.put("/:id", verifyToken, authorize("role", "canWrite"), (req,res) => {
     updateData(req, res, Role);
 });
 
 
-router.delete("/:id", verifyToken, authorize("DELETE_ROLE"),(req, res) => {
+router.delete("/:id", verifyToken, authorize("role", "canDelete"),(req, res) => {
     deleteData(req, res, Role);
 });
 
-router.get("/", verifyToken, authorize("GET_ROLES"), (req, res) => {
+router.get("/", verifyToken, authorize("role", "canRead"), (req, res) => {
    getAllData(req, res, Role);
 });
 
-router.get("/:id", verifyToken, authorize("GET_ROLES"),(req, res) => {
+router.get("/:id", verifyToken, authorize("role", "canRead"),(req, res) => {
     getDataById(req, res, Role);
 });
 module.exports = router;
